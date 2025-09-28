@@ -865,11 +865,54 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 - ✅ Security best practices implemented
 - ✅ Performance optimized
 
+## Phase 2.4: Utility Functions (COMPLETED)
+
+### Common Transformation Utilities
+
+#### **stringToBoolean Function**
+```typescript
+// src/common/utils/transformers.ts
+export function stringToBoolean(value: any): boolean {
+    if (typeof value === 'string') {
+        return value.toLowerCase() === 'true';
+    }
+    return Boolean(value);
+}
+```
+
+#### **Usage in Environment Configuration**
+```typescript
+// src/config/env.config.ts
+import { stringToBoolean } from '../common/utils/transformers';
+
+@Transform(stringToBoolean)
+ENABLE_MANUAL_LOGS?: boolean = true;
+
+@Transform(stringToBoolean)
+ENABLE_AUTOMATIC_LOGS?: boolean = true;
+
+@Transform(stringToBoolean)
+LOG_TO_FILE?: boolean = true;
+
+@Transform(stringToBoolean)
+LOG_TO_DATABASE?: boolean = false;
+
+@Transform(stringToBoolean)
+MASK_SENSITIVE_DATA?: boolean = true;
+```
+
+#### **Benefits**
+- **Reusability**: Single function for all boolean transformations
+- **Consistency**: Same logic across all environment variables
+- **Maintainability**: Change logic in one place
+- **Type Safety**: Proper TypeScript support
+- **Performance**: Optimized for common use cases
+
 ## Estimated Timeline
 
-- **Phase 1**: 2-3 hours
-- **Phase 2**: 4-5 hours  
-- **Phase 3**: 3-4 hours
+- **Phase 1**: 2-3 hours ✅ COMPLETED
+- **Phase 2**: 4-5 hours ✅ COMPLETED (including utility functions)
+- **Phase 3**: 3-4 hours  
 - **Phase 4**: 3-4 hours
 - **Phase 5**: 2-3 hours
 - **Total**: 14-19 hours of development time
