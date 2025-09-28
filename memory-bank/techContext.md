@@ -88,10 +88,19 @@ codebase-nestjs/
 │   │   │   └── validation.decorators.ts   # ✅ Advanced validation decorators
 │   │   ├── utils/                 # ✅ Common utility functions
 │   │   │   └── transformers.ts            # ✅ Reusable transformation functions
-│   │   ├── middleware/            # ⏳ Custom middleware (Phase 3)
-│   │   ├── interceptors/          # ⏳ Response interceptors (Phase 3)
+│   │   ├── middleware/            # ✅ Custom middleware (Phase 3.1)
+│   │   │   ├── logger.middleware.ts        # ✅ Request logging with correlation IDs
+│   │   │   ├── rate-limit.middleware.ts    # ✅ Rate limiting protection
+│   │   │   ├── cors.middleware.ts          # ✅ CORS handling with env config
+│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation
+│   │   │   ├── middleware.module.ts        # ✅ Middleware module
+│   │   │   └── index.ts                    # ✅ Middleware exports
+│   │   ├── constants/             # ✅ Header constants (Phase 3.1)
+│   │   │   ├── headers.constants.ts        # ✅ Centralized header names and values
+│   │   │   └── index.ts                    # ✅ Constants exports
+│   │   ├── interceptors/          # ⏳ Response interceptors (Phase 3.2)
 │   │   ├── guards/                # ⏳ Auth guards (Phase 4)
-│   │   └── filters/               # ⏳ Exception filters (Phase 3)
+│   │   └── filters/               # ⏳ Exception filters (Phase 3.3)
 │   ├── database/                 # ✅ Database configuration (complete)
 │   │   ├── database.module.ts     # ✅ MongoDB connection with Mongoose
 │   │   ├── database.service.ts    # ✅ Connection monitoring and health checks
@@ -131,9 +140,9 @@ codebase-nestjs/
 - **2.3 Request Validation**: ✅ class-validator implementation with custom pipe
 - **2.4 Utility Functions**: ✅ Common transformation functions for reusability
 
-### Phase 3: Advanced Features ⏳ READY TO START
+### Phase 3: Advanced Features 🔄 IN PROGRESS
 
-- **3.1 Middleware**: ⏳ Custom middleware implementation
+- **3.1 Middleware**: ✅ COMPLETE - Custom middleware implementation
 - **3.2 Interceptors**: ⏳ Response transformation and logging
 - **3.3 Response Consistency**: ⏳ Standardized API responses
 - **3.4 Cron Jobs**: ⏳ Scheduled task system

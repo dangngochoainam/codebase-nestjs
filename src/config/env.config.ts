@@ -1,6 +1,7 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import {
     IsBoolean,
+    IsNotEmpty,
     IsNumber,
     IsOptional,
     IsString,
@@ -91,4 +92,10 @@ export class EnvironmentConfig {
     @IsString()
     @IsOptional()
     LOG_DATABASE_COLLECTION?: string = 'application_logs';
+
+    // CORS Configuration
+    @Expose()
+    @IsString()
+    @IsNotEmpty()
+    CORS_ORIGINS: string;
 }

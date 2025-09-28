@@ -77,6 +77,7 @@ export class SystemLoggerService extends Logger {
         duration: number,
         userId?: string,
         requestId?: string,
+        correlationId?: string,
     ) {
         if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
             this.logger.info(`HTTP Request: ${method} ${url}`, {
@@ -87,6 +88,7 @@ export class SystemLoggerService extends Logger {
                 duration: `${duration}ms`,
                 userId,
                 requestId,
+                correlationId,
                 context: 'HTTP',
             });
         }
