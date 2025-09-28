@@ -10,7 +10,7 @@ export class EnvService {
 
     constructor() {
         // Load .env file
-        config({ path: '.env' });
+        config();
 
         // Load and validate environment variables
         this.config = validateEnvironment(process.env);
