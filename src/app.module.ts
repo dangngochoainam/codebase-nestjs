@@ -4,10 +4,11 @@ import {
     NestModule,
     RequestMethod,
 } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggerModule } from './common/logger/logger.module';
 import {
     CorsMiddleware,
-    LoggerMiddleware,
     RateLimitMiddleware,
     RequestIdMiddleware,
 } from './common/middleware';
@@ -17,6 +18,7 @@ import { DatabaseModule } from './database/database.module';
 
 @Module({
     imports: [EnvModule, LoggerModule, DatabaseModule, MiddlewareModule],
+    providers: [{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor }],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
@@ -27,8 +29,6 @@ export class AppModule implements NestModule {
             .apply(CorsMiddleware)
             .forRoutes({ path: '*path', method: RequestMethod.ALL })
             .apply(RateLimitMiddleware)
-            .forRoutes({ path: '*path', method: RequestMethod.ALL })
-            .apply(LoggerMiddleware)
             .forRoutes({ path: '*path', method: RequestMethod.ALL });
     }
 }

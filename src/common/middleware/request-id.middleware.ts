@@ -12,6 +12,9 @@ export class RequestIdMiddleware implements NestMiddleware {
 
         // Attach to request object
         req.requestId = requestId;
+        if (req.headers[HTTP_HEADERS.CORRELATION_ID]) {
+            req.correlationId = req.headers[HTTP_HEADERS.CORRELATION_ID];
+        }
 
         // Add to response headers
         res.setHeader(HTTP_HEADERS.REQUEST_ID, requestId);
@@ -19,6 +22,7 @@ export class RequestIdMiddleware implements NestMiddleware {
         // Add to response locals for use in other middleware/interceptors
         // To store data that's local to the current request.
         res.locals.requestId = requestId;
+        res.locals.correlationId = req.correlationId;
 
         next();
     }

@@ -69,27 +69,73 @@ export class SystemLoggerService extends Logger {
         return transportList;
     }
 
+    private limitSize(obj: any) {
+        try {
+            const json = JSON.stringify(obj);
+            return json.length > 4000 ? json.substring(0, 4000) + '…' : json;
+        } catch {
+            return '[unserializable]';
+        }
+    }
+
     // Automatic system logging methods (called by middleware/interceptors)
     logHttpRequest(
         method: string,
         url: string,
-        statusCode: number,
-        duration: number,
-        userId?: string,
-        requestId?: string,
+        requestId: string,
         correlationId?: string,
+        headers?: Record<string, any>,
+        body?: any,
     ) {
         if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
+            const safeHeaders = this.dataSanitizer.sanitize(headers || {});
+            const safeBody = this.dataSanitizer.sanitize(body || {});
+
             this.logger.info(`HTTP Request: ${method} ${url}`, {
                 type: 'http_request',
                 method,
                 url,
-                statusCode,
-                duration: `${duration}ms`,
-                userId,
                 requestId,
                 correlationId,
-                context: 'HTTP',
+                headers: safeHeaders,
+                body: this.limitSize(safeBody),
+            });
+        }
+    }
+
+    logHttpResponse(
+        method: string,
+        url: string,
+        requestId: string,
+        duration: number,
+        responseBody: any,
+        correlationId?: string,
+    ) {
+        if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
+            const sanitizedBody = this.dataSanitizer.sanitize(responseBody);
+
+            this.logger.info(`HTTP Response: ${method} ${url}`, {
+                type: 'http_response',
+                method,
+                url,
+                duration: `${duration}ms`,
+                requestId,
+                correlationId,
+                body: this.limitSize(sanitizedBody),
+            });
+        }
+    }
+
+    logError(message: string, error: Error, context?: string, meta?: any) {
+        if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
+            this.logger.error(message, {
+                context,
+                error: {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack,
+                },
+                ...this.dataSanitizer.sanitize(meta),
             });
         }
     }
@@ -123,20 +169,6 @@ export class SystemLoggerService extends Logger {
                 value,
                 unit,
                 context: 'Performance',
-            });
-        }
-    }
-
-    logError(message: string, error: Error, context?: string, meta?: any) {
-        if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
-            this.logger.error(message, {
-                context,
-                error: {
-                    name: error.name,
-                    message: error.message,
-                    stack: error.stack,
-                },
-                ...this.dataSanitizer.sanitize(meta),
             });
         }
     }
