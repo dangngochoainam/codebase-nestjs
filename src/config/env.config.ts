@@ -9,10 +9,19 @@ import {
     Min,
 } from 'class-validator';
 import { stringToBoolean } from '../common/utils/transformers';
+import { v7 } from 'uuid';
 
 @Exclude()
 export class EnvironmentConfig {
     // Application Configuration
+    @Expose()
+    @IsString()
+    SERVICE_NAME: string = 'UNSET';
+
+    @Expose()
+    @IsString()
+    INSTANCE_ID: string = v7();
+
     @Expose()
     @IsString()
     NODE_ENV: string;

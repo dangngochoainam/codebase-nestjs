@@ -16,12 +16,14 @@ import { MiddlewareModule } from './common/middleware/middleware.module';
 import { EnvModule } from './config/env.module';
 import { DatabaseModule } from './database/database.module';
 import { UserModule } from './modules/user/user.module';
+import { AlsModule } from './common/middleware/async-local-storage';
 
 @Module({
     imports: [
         EnvModule,
         LoggerModule,
         DatabaseModule,
+        AlsModule,
         MiddlewareModule,
         UserModule,
     ],

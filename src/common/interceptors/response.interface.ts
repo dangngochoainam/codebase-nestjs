@@ -1,4 +1,5 @@
 export interface BaseResponse {
+    message: string;
     success: boolean;
     requestId: string;
     systemCode: string;
@@ -11,11 +12,6 @@ export interface SuccessResponse<T = any> extends BaseResponse {
 
 export interface ErrorResponse extends BaseResponse {
     success: false;
-    error: {
-        message: string;
-        statusCode: number;
-        details?: any;
-    };
 }
 
 export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;

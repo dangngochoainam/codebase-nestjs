@@ -62,6 +62,19 @@ This NestJS project will follow a modular, layered architecture pattern that pro
 - Logging and monitoring
 - Response transformation
 - Error handling
+- System code standardization
+
+### 5. Context Pattern (AsyncLocalStorage)
+
+- Request context management across async operations
+- Request ID propagation through async call chains
+- Context-based logging with automatic requestId injection
+- **Implementation**:
+  - `AlsModule`: Global module providing AsyncLocalStorage instance
+  - `IAlsContext`: Interface defining context structure (requestId)
+  - `RequestIdMiddleware`: Stores requestId in AsyncLocalStorage
+  - Services access context via `als.getStore().requestId`
+  - **Benefits**: No need to manually pass requestId through function parameters
 
 ## Component Relationships
 
@@ -71,6 +84,8 @@ This NestJS project will follow a modular, layered architecture pattern that pro
 - **Feature Modules**: Domain-specific modules
 - **Shared Modules**: Common functionality
 - **Core Module**: Core services and utilities
+- **AlsModule**: AsyncLocalStorage for request context management
+- **LoggerModule**: Unified logging system with context support
 
 ### Data Flow
 
@@ -98,6 +113,18 @@ Request → DTO Validation → Controller → Service
 
 ```
 Error → Exception Filter → Response
+```
+
+### 4. Request Context Flow
+
+```
+Request → RequestIdMiddleware → AsyncLocalStorage → ContextLogger → Response
+```
+
+### 5. Logging Flow
+
+```
+Service/Controller → ContextLogger (with context) → ContextLoggerService → Winston → Transports
 ```
 
 ## Configuration Patterns

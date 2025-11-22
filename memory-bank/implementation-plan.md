@@ -46,29 +46,37 @@ This document outlines the comprehensive plan to build a production-ready NestJS
 
 ## Phase 2: Core Infrastructure (Priority: High)
 
-### 2.1 Dual Logging System Implementation
-- **Task**: Setup dual logging system - logs written BY developers vs logs written BY system automatically
-- **Two Distinct Log Types**:
-  - **Manual Logs (Written BY Developers)**: Explicit logging calls in business logic code
-  - **Automatic Logs (Written BY System)**: System-generated logs from middleware, interceptors, errors
+### 2.1 Unified Logging System Implementation ✅ COMPLETE (Refactored)
+- **Task**: Setup unified logging system with context-based logging
+- **Architecture**:
+  - **ContextLoggerService**: Main logger service that creates Winston logger instance
+  - **ContextLogger**: Context-specific logger instances created via `newContextLogger(context)`
+  - **Request Context Integration**: Automatic requestId injection from AsyncLocalStorage
 - **Features**:
-  - **Manual Developer Logging**: Explicit logger.info(), logger.debug() calls in code
-  - **Automatic System Logging**: HTTP requests, errors, performance metrics, security events
-  - **Multiple Transports**: Console, file rotation, database storage
-  - **Sensitive Data Protection**: Configurable data masking/hiding based on environment
-  - **Real-world Structure**: Structured logging with correlation IDs, request context
-  - **Log Levels**: error, warn, info, debug with different configurations per type
-  - **Separate Channels**: Different log files/collections for manual vs automatic logs
-- **Dependencies**: winston, nest-winston, winston-daily-rotate-file, winston-mongodb
+  - **Context-Based Logging**: Each service/controller gets its own ContextLogger instance
+  - **Automatic Request ID**: RequestId automatically injected from AsyncLocalStorage context
+  - **HTTP Request/Response Logging**: Built-in methods for logging HTTP operations
+  - **Error Formatting**: Formatted error stack traces with readable format
+  - **Multiple Transports**: Console and file rotation support
+  - **Sensitive Data Protection**: Data sanitization for sensitive information
+  - **Structured Logging**: JSON metadata with context, requestId, and custom fields
+- **Dependencies**: winston, nest-winston
 - **Files**:
-  - `src/common/logger/logger.module.ts` (main logger module)
-  - `src/common/logger/manual-logger.service.ts` (for developer manual logging)
-  - `src/common/logger/system-logger.service.ts` (for automatic system logging)
-  - `src/common/logger/logger.config.ts` (logging configuration)
+  - `src/common/logger/base-logger.service.ts` (ContextLoggerService and ContextLogger)
+  - `src/common/logger/logger.module.ts` (logger module)
   - `src/common/logger/data-sanitizer.ts` (sensitive data handling)
-  - `src/common/logger/formatters/` (custom log formatters)
-  - `src/common/logger/transports/` (custom transport configurations)
-  - `logs/` directory structure (manual/, automatic/)
+  - `logs/manual/` directory structure
+- **Usage**:
+  ```typescript
+  // In service/controller
+  constructor(private contextLoggerService: ContextLoggerService) {
+    this.logger = contextLoggerService.newContextLogger(this.constructor.name);
+  }
+  
+  // Logging with automatic requestId from AsyncLocalStorage
+  this.logger.info('Message', { requestId });
+  this.logger.error('Error', error, { requestId });
+  ```
 
 ### 2.2 MongoDB Connection Setup
 - **Task**: Configure MongoDB with Mongoose
@@ -103,27 +111,31 @@ This document outlines the comprehensive plan to build a production-ready NestJS
 ### 3.1 Middleware Implementation ✅ COMPLETE
 - **Task**: Create custom middleware for common operations
 - **Features**:
-  - Request logging middleware ✅
+  - Request logging middleware ✅ (integrated in ResponseInterceptor)
   - CORS handling middleware ✅
   - Rate limiting middleware ✅
-  - Request ID generation ✅
+  - Request ID generation with AsyncLocalStorage ✅
   - Security headers middleware ✅
-- **Dependencies**: helmet, uuid, @types/uuid ✅
+- **Dependencies**: helmet, uuid, @types/uuid, async_hooks ✅
 - **Files**:
-  - `src/common/middleware/logger.middleware.ts` ✅
+  - `src/common/middleware/async-local-storage.ts` ✅ (AlsModule for request context)
   - `src/common/middleware/rate-limit.middleware.ts` ✅
   - `src/common/middleware/cors.middleware.ts` ✅
-  - `src/common/middleware/request-id.middleware.ts` ✅
+  - `src/common/middleware/request-id.middleware.ts` ✅ (uses AsyncLocalStorage)
   - `src/common/middleware/middleware.module.ts` ✅
   - `src/common/middleware/index.ts` ✅
   - `src/common/constants/headers.constants.ts` ✅
+  - `src/common/constants/system-code.constants.ts` ✅ (system codes)
+  - `src/common/constants/timestamp.constants.ts` ✅ (timestamp format)
   - `src/common/constants/index.ts` ✅
   - `src/common/types/index.ts` ✅ (CustomRequest interface)
 - **Improvements**:
   - Header constants for maintainability ✅
   - Type consolidation in types folder ✅
   - Environment integration for CORS_ORIGINS ✅
-  - Separated requestId and correlationId concepts ✅
+  - AsyncLocalStorage for request context management ✅
+  - System code constants for error standardization ✅
+  - Timestamp format constants ✅
 
 ### 3.2 Interceptors Setup ✅ COMPLETE
 - **Task**: Implement response transformation and logging
@@ -132,19 +144,21 @@ This document outlines the comprehensive plan to build a production-ready NestJS
   - Logging interceptor for requests/responses ✅
   - Error transformation interceptor ✅
   - Performance monitoring interceptor ✅ (duration tracking)
+  - System code integration ✅
   - Cache control interceptor ⏳ (not implemented)
 - **Files**:
   - `src/common/interceptors/response.interceptor.ts` ✅
   - `src/common/interceptors/response.interface.ts` ✅
-  - `src/common/interceptors/logging.interceptor.ts` ⏳ (merged into response.interceptor.ts)
-  - `src/common/interceptors/error.interceptor.ts` ⏳ (merged into response.interceptor.ts)
+  - `src/common/constants/system-code.constants.ts` ✅ (system codes)
 - **Implementation Details**:
   - Global interceptor registered via APP_INTERCEPTOR
   - Wraps all responses in SuccessResponse or ErrorResponse format
-  - Automatic request/response logging with SystemLoggerService
+  - Automatic request/response logging with ContextLogger
   - Error handling with proper HTTP status codes and system codes
+  - System code extraction from HttpException for standardized errors
   - Request duration tracking for performance monitoring
-  - Integration with CustomRequest for requestId and correlationId
+  - Integration with CustomRequest for requestId
+  - Uses AsyncLocalStorage for request context access
 
 ### 3.3 Response Consistency ✅ COMPLETE
 - **Task**: Standardize API response format
@@ -152,18 +166,22 @@ This document outlines the comprehensive plan to build a production-ready NestJS
   - Consistent response wrapper ✅
   - Error response standardization ✅
   - Success response formatting ✅
+  - System code standardization ✅
   - Pagination response format ⏳ (not implemented)
   - Status code standardization ✅
 - **Files**:
-  - `src/common/interceptors/response.interface.ts` ✅ (moved from interfaces/)
+  - `src/common/interceptors/response.interface.ts` ✅
+  - `src/common/constants/system-code.constants.ts` ✅ (system codes and error messages)
   - `src/common/dto/response.dto.ts` ⏳ (not needed, using interfaces)
   - `src/common/filters/http-exception.filter.ts` ⏳ (error handling in interceptor)
 - **Implementation Details**:
-  - BaseResponse interface with success, requestId, systemCode
+  - BaseResponse interface with success, requestId, systemCode, message
   - SuccessResponse<T> interface extending BaseResponse with data
   - ErrorResponse interface extending BaseResponse with error details
   - ApiResponse<T> union type for type safety
-  - System codes: '00200' for success, '00400' for bad request, '00401' for unauthorized, '00403' for forbidden, 'SORRY_SOMETHING_WENT_WRONG' for server errors
+  - System codes: SUCCESS, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, SORRY_SOMETHING_WENT_WRONG
+  - ERROR_MESSAGE mapping for consistent error messages
+  - System codes extracted from HttpException messages for standardized error handling
 
 ### 3.4 Cron Jobs Setup
 - **Task**: Implement scheduled task system

@@ -1,61 +1,47 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { SystemLoggerService } from '../common/logger/system-logger.service';
+import {
+    ContextLogger,
+    ContextLoggerService,
+} from '../common/logger/base-logger.service';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
+    private readonly logger: ContextLogger;
+
     constructor(
         @InjectConnection() private connection: Connection,
-        private systemLogger: SystemLoggerService,
-    ) {}
+        protected readonly contextLoggerService: ContextLoggerService,
+    ) {
+        this.logger = contextLoggerService.newContextLogger(
+            this.constructor.name,
+        );
+    }
 
     async onModuleInit() {
-        // Log successful connection
-
-        this.systemLogger.logApplicationStart(
-            this.connection.port || 27017,
-            'database',
-        );
-
         // Set up connection event listeners
         this.connection.on('connected', () => {
-            this.systemLogger.logPerformanceMetric(
-                'database_connection',
-                0,
-                'success',
-            );
+            this.logger.info('database_connection');
         });
 
         this.connection.on('error', (error) => {
-            this.systemLogger.logError(
-                'Database connection error',
-                error,
-                'Database',
-            );
+            this.logger.error('Database connection error', error);
         });
 
         this.connection.on('disconnected', () => {
-            this.systemLogger.logSecurityEvent('database_disconnection', {
-                host: this.connection.host,
-                port: this.connection.port,
-                name: this.connection.name,
-            });
+            this.logger.info('database_disconnection');
         });
 
         this.connection.on('reconnected', () => {
-            this.systemLogger.logPerformanceMetric(
-                'database_reconnection',
-                0,
-                'success',
-            );
+            this.logger.info('database_reconnection');
         });
     }
 
     async onModuleDestroy() {
         if (this.connection.readyState === 1) {
             await this.connection.close();
-            this.systemLogger.logApplicationShutdown('database_cleanup');
+            this.logger.info('database_cleanup');
         }
     }
 
@@ -87,11 +73,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
                 },
             };
         } catch (error) {
-            this.systemLogger.logError(
-                'Database health check failed',
-                error,
-                'Database',
-            );
+            this.logger.error('Database health check failed', error);
             return {
                 status: 'error',
                 details: { error: error.message },

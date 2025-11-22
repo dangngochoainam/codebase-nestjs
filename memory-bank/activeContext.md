@@ -3,9 +3,9 @@
 ## Current Work Focus
 
 **Phase**: NestJS Codebase Development with Advanced Features
-**Status**: Phase 3.2-3.3 Complete - Phase 4.1 Started
+**Status**: Phase 3.2-3.3 Complete - Phase 4.1 In Progress
 **Priority**: High - Full-featured backend development
-**Last Updated**: Current session - Response Interceptor and User Module implemented
+**Last Updated**: Current session - Logger refactoring, AsyncLocalStorage integration, System Code constants
 
 ## Recent Changes
 
@@ -20,6 +20,10 @@
 - **Phase 3.2**: ✅ COMPLETE - Implemented **Response Interceptor** with standardized API response format
 - **Phase 3.3**: ✅ COMPLETE - Implemented **Response Consistency** with success/error response wrappers
 - **Phase 4.1**: 🔄 IN PROGRESS - Created **User Module** with basic endpoint (GET /users/online)
+- **Logger System Refactoring**: ✅ COMPLETE - Unified logging system with ContextLoggerService and ContextLogger
+- **AsyncLocalStorage Integration**: ✅ COMPLETE - Request context management using AsyncLocalStorage
+- **System Code Constants**: ✅ COMPLETE - Standardized system codes and error messages
+- **Timestamp Constants**: ✅ COMPLETE - Centralized timestamp format constants
 - **Memory Bank Updates**: Comprehensive documentation updates across all files
 - **Custom EnvService**: Global module with dotenv integration and typed property access
 - **Utility Functions**: Reusable string-to-boolean transformation functions
@@ -144,6 +148,31 @@
 3. **Phase 3.3**: Standardize all API responses
 4. **Phase 3.4**: Implement scheduled task system (cron jobs)
 
+## Recent Architectural Improvements
+
+### Logger System Refactoring
+- **Unified Architecture**: Replaced separate ManualLoggerService and SystemLoggerService with ContextLoggerService
+- **Context-Based Logging**: ContextLogger class provides context-specific logging instances
+- **Request ID Integration**: Automatic requestId injection from AsyncLocalStorage context
+- **Simplified API**: Single logger service with context creation method (`newContextLogger()`)
+- **Benefits**: Cleaner code, better request tracking, easier to use
+
+### AsyncLocalStorage Integration
+- **Request Context Management**: AsyncLocalStorage module (AlsModule) for managing request context across async operations
+- **Request ID Propagation**: RequestIdMiddleware stores requestId in AsyncLocalStorage for automatic access
+- **Context Interface**: IAlsContext interface defines request context structure
+- **Benefits**: Automatic requestId access in services without manual passing, better async operation tracking
+
+### System Code Standardization
+- **System Code Constants**: Centralized system codes (SUCCESS, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, etc.)
+- **Error Message Mapping**: ERROR_MESSAGE constant provides consistent error messages
+- **Response Interceptor Integration**: Response interceptor uses system codes for standardized error handling
+- **Benefits**: Consistent error codes across the application, easier error handling
+
+### Timestamp Format Standardization
+- **Timestamp Constants**: Centralized timestamp format (DD-MM-YYYY HH:mm:ss.SSS)
+- **Benefits**: Consistent timestamp formatting across the application
+
 ## Session Summary (Current)
 
 ### ✅ **Completed in This Session**
@@ -151,12 +180,18 @@
 - **Phase 3.3 Response Consistency**: Created response interfaces (SuccessResponse, ErrorResponse, ApiResponse)
 - **Response Wrapping**: All API responses now wrapped in consistent format with success flag, requestId, and systemCode
 - **Error Handling**: Comprehensive error transformation with proper HTTP status codes and system codes
-- **System Logger Integration**: Response interceptor integrated with SystemLoggerService for automatic logging
+- **Logger System Refactoring**: Unified logging system with ContextLoggerService and ContextLogger classes
+- **Context-Based Logging**: ContextLogger provides context-specific logging with requestId tracking
+- **AsyncLocalStorage Integration**: Request context management using Node.js AsyncLocalStorage for async operations
+- **System Code Constants**: Standardized system codes (SUCCESS, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, etc.)
+- **Error Message Mapping**: ERROR_MESSAGE constant mapping for consistent error messages
+- **Timestamp Constants**: Centralized timestamp format (DD-MM-YYYY HH:mm:ss.SSS)
 - **HTTP Request/Response Logging**: Automatic logging of all HTTP requests and responses with duration tracking
 - **Phase 4.1 User Module**: Created basic user module with controller, service, and module structure
 - **User Endpoint**: Implemented GET /users/online endpoint as sample implementation
 - **App Module Integration**: ResponseInterceptor registered as global interceptor via APP_INTERCEPTOR
-- **System Logger Enhancements**: Added logHttpRequest and logHttpResponse methods with request tracking
+- **AlsModule**: Global module for AsyncLocalStorage with IAlsContext interface
+- **Request ID Middleware**: Updated to use AsyncLocalStorage for request context management
 - **Response Interface Types**: Type-safe response interfaces for consistent API responses
 - **Memory Bank Updates**: Comprehensive documentation updates across all files
 
@@ -193,9 +228,8 @@ codebase-nestjs/
 │   │   ├── env.service.ts        # ✅ Custom EnvService (global)
 │   │   └── env.module.ts          # ✅ Custom EnvModule
 │   ├── common/                    # ✅ Shared utilities (complete)
-│   │   ├── logger/                # ✅ Dual logging system
-│   │   │   ├── manual-logger.service.ts    # ✅ Manual logging
-│   │   │   ├── system-logger.service.ts    # ✅ Automatic logging
+│   │   ├── logger/                # ✅ Unified logging system
+│   │   │   ├── base-logger.service.ts      # ✅ ContextLoggerService and ContextLogger
 │   │   │   ├── data-sanitizer.ts           # ✅ Sensitive data protection
 │   │   │   └── logger.module.ts            # ✅ Logger module
 │   │   ├── pipes/                 # ✅ Validation pipes
@@ -207,14 +241,16 @@ codebase-nestjs/
 │   │   ├── utils/                 # ✅ Common utility functions
 │   │   │   └── transformers.ts            # ✅ Reusable transformation functions
 │   │   ├── middleware/            # ✅ Custom middleware (Phase 3.1)
-│   │   │   ├── logger.middleware.ts        # ✅ Request logging with correlation IDs
+│   │   │   ├── async-local-storage.ts      # ✅ AsyncLocalStorage module for request context
 │   │   │   ├── rate-limit.middleware.ts    # ✅ Rate limiting protection
 │   │   │   ├── cors.middleware.ts          # ✅ CORS handling with env config
-│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation
+│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation with AsyncLocalStorage
 │   │   │   ├── middleware.module.ts        # ✅ Middleware module
 │   │   │   └── index.ts                    # ✅ Middleware exports
-│   │   ├── constants/             # ✅ Header constants (Phase 3.1)
+│   │   ├── constants/             # ✅ Constants (Phase 3.1+)
 │   │   │   ├── headers.constants.ts        # ✅ Centralized header names and values
+│   │   │   ├── system-code.constants.ts    # ✅ System codes and error messages
+│   │   │   ├── timestamp.constants.ts      # ✅ Timestamp format constants
 │   │   │   └── index.ts                    # ✅ Constants exports
 │   │   ├── interceptors/          # ✅ Response interceptors (Phase 3.2)
 │   │   │   ├── response.interceptor.ts     # ✅ Response transformation and logging
@@ -255,7 +291,9 @@ codebase-nestjs/
 - **Linting**: ESLint with TypeScript rules and Node.js globals
 - **Build System**: Successful compilation and project building
 - **No External Dependencies**: Custom implementation without @nestjs/config
-- **Dual Logging System**: Manual vs Automatic logging with Winston
+- **Unified Logging System**: ContextLoggerService with context-based logging (ContextLogger)
+- **AsyncLocalStorage**: Request context management for async operations
+- **System Code Constants**: Standardized error codes and messages
 - **MongoDB Integration**: Full connection with Mongoose and monitoring
 - **Request Validation**: Global validation with class-validator
 - **Utility Functions**: Reusable transformation functions for common operations

@@ -6,12 +6,21 @@ import {
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { SystemLoggerService } from '../logger/system-logger.service';
+import {
+    ContextLogger,
+    ContextLoggerService,
+} from '../logger/base-logger.service';
 import { FunctionConstructor } from '../types';
 
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
-    constructor(private systemLogger: SystemLoggerService) {}
+    private readonly logger: ContextLogger;
+
+    constructor(protected readonly contextLoggerService: ContextLoggerService) {
+        this.logger = contextLoggerService.newContextLogger(
+            this.constructor.name,
+        );
+    }
 
     async transform(value: any, { metatype }: ArgumentMetadata) {
         if (!metatype || !this.toValidate(metatype)) {
@@ -23,18 +32,16 @@ export class ValidationPipe implements PipeTransform<any> {
 
         if (errors.length > 0) {
             const errorMessages = this.formatValidationErrors(errors);
-
-            // Log validation errors using system logger
-            this.systemLogger.logSecurityEvent('validation_error', {
-                errors: errorMessages,
-                value: this.sanitizeValue(value),
-            });
-
-            throw new BadRequestException({
+            const validationError = new BadRequestException({
                 message: 'Validation failed',
                 errors: errorMessages,
                 statusCode: 400,
             });
+
+            // Log error using context logger
+            this.logger.error('Validation failed', validationError);
+
+            throw validationError;
         }
 
         return object;

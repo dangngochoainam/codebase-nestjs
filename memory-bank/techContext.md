@@ -75,9 +75,8 @@ codebase-nestjs/
 │   │   ├── env.service.ts          # ✅ Custom EnvService (global)
 │   │   └── env.module.ts           # ✅ Custom EnvModule
 │   ├── common/                    # ✅ Shared utilities (complete)
-│   │   ├── logger/                # ✅ Dual logging system
-│   │   │   ├── manual-logger.service.ts    # ✅ Manual logging
-│   │   │   ├── system-logger.service.ts    # ✅ Automatic logging
+│   │   ├── logger/                # ✅ Unified logging system
+│   │   │   ├── base-logger.service.ts      # ✅ ContextLoggerService and ContextLogger
 │   │   │   ├── data-sanitizer.ts           # ✅ Sensitive data protection
 │   │   │   └── logger.module.ts            # ✅ Logger module
 │   │   ├── pipes/                 # ✅ Validation pipes
@@ -89,14 +88,16 @@ codebase-nestjs/
 │   │   ├── utils/                 # ✅ Common utility functions
 │   │   │   └── transformers.ts            # ✅ Reusable transformation functions
 │   │   ├── middleware/            # ✅ Custom middleware (Phase 3.1)
-│   │   │   ├── logger.middleware.ts        # ✅ Request logging with correlation IDs
+│   │   │   ├── async-local-storage.ts      # ✅ AsyncLocalStorage module for request context
 │   │   │   ├── rate-limit.middleware.ts    # ✅ Rate limiting protection
 │   │   │   ├── cors.middleware.ts          # ✅ CORS handling with env config
-│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation
+│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation with AsyncLocalStorage
 │   │   │   ├── middleware.module.ts        # ✅ Middleware module
 │   │   │   └── index.ts                    # ✅ Middleware exports
-│   │   ├── constants/             # ✅ Header constants (Phase 3.1)
+│   │   ├── constants/             # ✅ Constants (Phase 3.1+)
 │   │   │   ├── headers.constants.ts        # ✅ Centralized header names and values
+│   │   │   ├── system-code.constants.ts    # ✅ System codes and error messages
+│   │   │   ├── timestamp.constants.ts      # ✅ Timestamp format constants
 │   │   │   └── index.ts                    # ✅ Constants exports
 │   │   ├── interceptors/          # ✅ Response interceptors (Phase 3.2)
 │   │   │   ├── response.interceptor.ts     # ✅ Response transformation and logging
@@ -142,16 +143,16 @@ codebase-nestjs/
 
 ### Phase 2: Core Infrastructure ✅ COMPLETE
 
-- **2.1 Dual Logging**: ✅ Manual vs automatic logging system with Winston
+- **2.1 Unified Logging**: ✅ ContextLoggerService with context-based logging (refactored from dual system)
 - **2.2 MongoDB Setup**: ✅ Mongoose connection and schemas with monitoring
 - **2.3 Request Validation**: ✅ class-validator implementation with custom pipe
 - **2.4 Utility Functions**: ✅ Common transformation functions for reusability
 
 ### Phase 3: Advanced Features 🔄 IN PROGRESS
 
-- **3.1 Middleware**: ✅ COMPLETE - Custom middleware implementation
-- **3.2 Interceptors**: ✅ COMPLETE - Response transformation and logging
-- **3.3 Response Consistency**: ✅ COMPLETE - Standardized API responses
+- **3.1 Middleware**: ✅ COMPLETE - Custom middleware implementation with AsyncLocalStorage
+- **3.2 Interceptors**: ✅ COMPLETE - Response transformation and logging with system codes
+- **3.3 Response Consistency**: ✅ COMPLETE - Standardized API responses with system codes
 - **3.4 Cron Jobs**: ⏳ Scheduled task system
 
 ### Phase 4: Sample Implementation 🔄 IN PROGRESS
@@ -278,27 +279,33 @@ const isEnabled = stringToBoolean(process.env.SOME_FLAG);
 ## Current Session Updates
 
 ### ✅ **Memory Bank Synchronization**
-- **activeContext.md**: Updated with Phase 3.2-3.3 completion and Phase 4.1 progress
-- **progress.md**: Updated to show Phase 3.2-3.3 completion and User Module structure
-- **techContext.md**: Updated implementation status with interceptors and user module
+- **activeContext.md**: Updated with logger refactoring, AsyncLocalStorage, and system code constants
+- **progress.md**: Updated to reflect unified logging system and new constants
+- **techContext.md**: Updated implementation status with refactored logger and AsyncLocalStorage
+- **systemPatterns.md**: Added context pattern and AsyncLocalStorage patterns
 - **implementation-plan.md**: Reflects current project status
 
 ### ✅ **Project Status Summary**
 - **Phase 1**: ✅ Complete (Project foundation, environment config, code quality)
-- **Phase 2**: ✅ Complete (Logging, MongoDB, validation, utilities)
-- **Phase 3.1**: ✅ Complete (Middleware implementation)
-- **Phase 3.2**: ✅ Complete (Response Interceptor)
-- **Phase 3.3**: ✅ Complete (Response Consistency)
+- **Phase 2**: ✅ Complete (Unified logging, MongoDB, validation, utilities)
+- **Phase 3.1**: ✅ Complete (Middleware implementation with AsyncLocalStorage)
+- **Phase 3.2**: ✅ Complete (Response Interceptor with system codes)
+- **Phase 3.3**: ✅ Complete (Response Consistency with system codes)
 - **Phase 3.4**: ⏳ Pending (Cron Jobs)
 - **Phase 4.1**: 🔄 In Progress (User Module - basic structure created)
 - **Memory Bank**: ✅ Fully synchronized and up-to-date
 
 ### ✅ **Key Accomplishments**
-- **Response Interceptor**: Implemented with standardized response format and automatic logging
-- **Response Interfaces**: Type-safe response interfaces for consistent API responses
-- **System Logger Integration**: Enhanced with logHttpRequest and logHttpResponse methods
-- **User Module**: Basic structure created with GET /users/online endpoint
-- **Error Handling**: Comprehensive error transformation with proper HTTP status codes and system codes
+- **Logger System Refactoring**: Unified logging with ContextLoggerService and ContextLogger
+- **Context-Based Logging**: ContextLogger provides automatic requestId injection from AsyncLocalStorage
+- **AsyncLocalStorage Integration**: Request context management for async operations
+- **System Code Constants**: Standardized system codes (SUCCESS, BAD_REQUEST, UNAUTHORIZED, etc.)
+- **Error Message Mapping**: Consistent error messages through ERROR_MESSAGE constants
+- **Timestamp Constants**: Centralized timestamp format for consistency
+- **Response Interceptor**: Enhanced with system codes and context-based logging
+- **Request ID Middleware**: Updated to use AsyncLocalStorage for context propagation
+- **User Module**: Basic structure created with GET /users/online endpoint using AsyncLocalStorage
+- **Error Handling**: Comprehensive error transformation with system codes
 - **Documentation**: Comprehensive Memory Bank updates across all files
-- **Code Organization**: Improved maintainability with interceptors and response consistency
+- **Code Organization**: Improved maintainability with unified logging and context management
 - **Project Structure**: Complete file tree with all implemented features
