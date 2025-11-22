@@ -84,11 +84,9 @@ export class SystemLoggerService extends Logger {
         url: string,
         requestId: string,
         correlationId?: string,
-        headers?: Record<string, any>,
         body?: any,
     ) {
         if (this.envService.ENVIRONMENT.ENABLE_AUTOMATIC_LOGS) {
-            const safeHeaders = this.dataSanitizer.sanitize(headers || {});
             const safeBody = this.dataSanitizer.sanitize(body || {});
 
             this.logger.info(`HTTP Request: ${method} ${url}`, {
@@ -97,7 +95,6 @@ export class SystemLoggerService extends Logger {
                 url,
                 requestId,
                 correlationId,
-                headers: safeHeaders,
                 body: this.limitSize(safeBody),
             });
         }

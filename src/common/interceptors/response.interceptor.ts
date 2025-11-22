@@ -39,7 +39,6 @@ export class ResponseInterceptor<T>
             url,
             request.requestId,
             request.correlationId,
-            request?.headers,
             request?.body,
         );
 
