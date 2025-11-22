@@ -1,11 +1,10 @@
 import { Global, Module } from '@nestjs/common';
-import { ManualLoggerService } from './manual-logger.service';
-import { SystemLoggerService } from './system-logger.service';
 import { DataSanitizer } from './data-sanitizer';
+import { ContextLoggerService } from './base-logger.service';
 
 @Global()
 @Module({
-    providers: [DataSanitizer, ManualLoggerService, SystemLoggerService],
-    exports: [DataSanitizer, ManualLoggerService, SystemLoggerService],
+    providers: [DataSanitizer, ContextLoggerService],
+    exports: [DataSanitizer, ContextLoggerService],
 })
 export class LoggerModule {}

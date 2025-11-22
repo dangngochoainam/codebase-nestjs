@@ -5,7 +5,6 @@
 export const HTTP_HEADERS = {
     // Request/Response Tracking
     REQUEST_ID: 'X-Request-ID',
-    CORRELATION_ID: 'X-Correlation-ID',
 
     // Rate Limiting
     RATE_LIMIT_LIMIT: 'X-RateLimit-Limit',

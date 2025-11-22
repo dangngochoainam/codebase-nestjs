@@ -5,7 +5,10 @@ import {
     HttpStatus,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { SystemLoggerService } from '../logger/system-logger.service';
+import {
+    ContextLogger,
+    ContextLoggerService,
+} from '../logger/base-logger.service';
 import { HTTP_HEADERS } from '../constants';
 
 interface RateLimitConfig {
@@ -24,8 +27,12 @@ export class RateLimitMiddleware implements NestMiddleware {
         { count: number; resetTime: number }
     >();
     private readonly config: RateLimitConfig;
+    private readonly logger: ContextLogger;
 
-    constructor(private readonly systemLogger: SystemLoggerService) {
+    constructor(protected readonly contextLoggerService: ContextLoggerService) {
+        this.logger = contextLoggerService.newContextLogger(
+            this.constructor.name,
+        );
         this.config = {
             windowMs: 15 * 60 * 1000, // 15 minutes
             maxRequests: 100, // limit each IP to 100 requests per windowMs
@@ -62,7 +69,8 @@ export class RateLimitMiddleware implements NestMiddleware {
         // Check if limit exceeded
         if (clientRecord.count > this.config.maxRequests) {
             // Log rate limit violation
-            this.systemLogger.logSecurityEvent('RATE_LIMIT_EXCEEDED', {
+            this.logger.info({
+                message: 'RATE_LIMIT_EXCEEDED',
                 clientIp,
                 requestCount: clientRecord.count,
                 maxRequests: this.config.maxRequests,

@@ -75,9 +75,8 @@ codebase-nestjs/
 │   │   ├── env.service.ts          # ✅ Custom EnvService (global)
 │   │   └── env.module.ts           # ✅ Custom EnvModule
 │   ├── common/                    # ✅ Shared utilities (complete)
-│   │   ├── logger/                # ✅ Dual logging system
-│   │   │   ├── manual-logger.service.ts    # ✅ Manual logging
-│   │   │   ├── system-logger.service.ts    # ✅ Automatic logging
+│   │   ├── logger/                # ✅ Unified logging system
+│   │   │   ├── base-logger.service.ts      # ✅ ContextLoggerService and ContextLogger
 │   │   │   ├── data-sanitizer.ts           # ✅ Sensitive data protection
 │   │   │   └── logger.module.ts            # ✅ Logger module
 │   │   ├── pipes/                 # ✅ Validation pipes
@@ -89,16 +88,22 @@ codebase-nestjs/
 │   │   ├── utils/                 # ✅ Common utility functions
 │   │   │   └── transformers.ts            # ✅ Reusable transformation functions
 │   │   ├── middleware/            # ✅ Custom middleware (Phase 3.1)
-│   │   │   ├── logger.middleware.ts        # ✅ Request logging with correlation IDs
+│   │   │   ├── async-local-storage.ts      # ✅ AsyncLocalStorage module for request context
 │   │   │   ├── rate-limit.middleware.ts    # ✅ Rate limiting protection
 │   │   │   ├── cors.middleware.ts          # ✅ CORS handling with env config
-│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation
+│   │   │   ├── request-id.middleware.ts    # ✅ Request ID generation with AsyncLocalStorage
 │   │   │   ├── middleware.module.ts        # ✅ Middleware module
 │   │   │   └── index.ts                    # ✅ Middleware exports
-│   │   ├── constants/             # ✅ Header constants (Phase 3.1)
+│   │   ├── constants/             # ✅ Constants (Phase 3.1+)
 │   │   │   ├── headers.constants.ts        # ✅ Centralized header names and values
+│   │   │   ├── system-code.constants.ts    # ✅ System codes and error messages
+│   │   │   ├── timestamp.constants.ts      # ✅ Timestamp format constants
 │   │   │   └── index.ts                    # ✅ Constants exports
-│   │   ├── interceptors/          # ⏳ Response interceptors (Phase 3.2)
+│   │   ├── interceptors/          # ✅ Response interceptors (Phase 3.2)
+│   │   │   ├── response.interceptor.ts     # ✅ Response transformation and logging
+│   │   │   └── response.interface.ts       # ✅ Response type definitions
+│   │   ├── types/                 # ✅ Type definitions
+│   │   │   └── index.ts                    # ✅ CustomRequest interface
 │   │   ├── guards/                # ⏳ Auth guards (Phase 4)
 │   │   └── filters/               # ⏳ Exception filters (Phase 3.3)
 │   ├── database/                 # ✅ Database configuration (complete)
@@ -106,9 +111,12 @@ codebase-nestjs/
 │   │   ├── database.service.ts    # ✅ Connection monitoring and health checks
 │   │   └── schemas/               # ✅ Mongoose schemas
 │   │       └── user.schema.ts             # ✅ User schema with validation
-│   └── modules/                   # ⏳ Feature modules (Phase 4)
+│   └── modules/                   # 🔄 Feature modules (Phase 4.1)
+│       └── user/                  # 🔄 User management module
+│           ├── user.controller.ts # ✅ User controller with GET /users/online
+│           ├── user.service.ts    # ✅ User service with basic logic
+│           └── user.module.ts    # ✅ User module
 │       ├── auth/                  # ⏳ Authentication module
-│       ├── users/                 # ⏳ User management
 │       └── health/                # ⏳ Health checks
 ├── logs/                          # ✅ Log directory structure
 │   ├── manual/                    # ✅ Manual developer logs
@@ -135,21 +143,21 @@ codebase-nestjs/
 
 ### Phase 2: Core Infrastructure ✅ COMPLETE
 
-- **2.1 Dual Logging**: ✅ Manual vs automatic logging system with Winston
+- **2.1 Unified Logging**: ✅ ContextLoggerService with context-based logging (refactored from dual system)
 - **2.2 MongoDB Setup**: ✅ Mongoose connection and schemas with monitoring
 - **2.3 Request Validation**: ✅ class-validator implementation with custom pipe
 - **2.4 Utility Functions**: ✅ Common transformation functions for reusability
 
 ### Phase 3: Advanced Features 🔄 IN PROGRESS
 
-- **3.1 Middleware**: ✅ COMPLETE - Custom middleware implementation
-- **3.2 Interceptors**: ⏳ Response transformation and logging
-- **3.3 Response Consistency**: ⏳ Standardized API responses
+- **3.1 Middleware**: ✅ COMPLETE - Custom middleware implementation with AsyncLocalStorage
+- **3.2 Interceptors**: ✅ COMPLETE - Response transformation and logging with system codes
+- **3.3 Response Consistency**: ✅ COMPLETE - Standardized API responses with system codes
 - **3.4 Cron Jobs**: ⏳ Scheduled task system
 
-### Phase 4: Sample Implementation ⏳ PENDING
+### Phase 4: Sample Implementation 🔄 IN PROGRESS
 
-- **4.1 Sample Modules**: ⏳ User management, auth, health
+- **4.1 Sample Modules**: 🔄 User management (basic structure ✅, CRUD operations ⏳), auth ⏳, health ⏳
 - **4.2 API Documentation**: ⏳ Swagger/OpenAPI setup
 
 ### Phase 5: Testing & QA ⏳ PENDING
@@ -271,20 +279,33 @@ const isEnabled = stringToBoolean(process.env.SOME_FLAG);
 ## Current Session Updates
 
 ### ✅ **Memory Bank Synchronization**
-- **activeContext.md**: Updated with current session accomplishments and Phase 3 readiness
-- **progress.md**: Updated to show Phase 2 completion and Memory Bank synchronization
-- **techContext.md**: Updated implementation status and project structure
-- **implementation-plan.md**: Added Phase 2.4 utility functions documentation
+- **activeContext.md**: Updated with logger refactoring, AsyncLocalStorage, and system code constants
+- **progress.md**: Updated to reflect unified logging system and new constants
+- **techContext.md**: Updated implementation status with refactored logger and AsyncLocalStorage
+- **systemPatterns.md**: Added context pattern and AsyncLocalStorage patterns
+- **implementation-plan.md**: Reflects current project status
 
 ### ✅ **Project Status Summary**
 - **Phase 1**: ✅ Complete (Project foundation, environment config, code quality)
-- **Phase 2**: ✅ Complete (Logging, MongoDB, validation, utilities)
-- **Phase 3**: ⏳ Ready to start (Middleware, interceptors, responses, cron jobs)
+- **Phase 2**: ✅ Complete (Unified logging, MongoDB, validation, utilities)
+- **Phase 3.1**: ✅ Complete (Middleware implementation with AsyncLocalStorage)
+- **Phase 3.2**: ✅ Complete (Response Interceptor with system codes)
+- **Phase 3.3**: ✅ Complete (Response Consistency with system codes)
+- **Phase 3.4**: ⏳ Pending (Cron Jobs)
+- **Phase 4.1**: 🔄 In Progress (User Module - basic structure created)
 - **Memory Bank**: ✅ Fully synchronized and up-to-date
 
 ### ✅ **Key Accomplishments**
-- **Utility Functions**: Created reusable `stringToBoolean` transformation function
-- **Environment Config**: Updated to use utility functions for consistency
+- **Logger System Refactoring**: Unified logging with ContextLoggerService and ContextLogger
+- **Context-Based Logging**: ContextLogger provides automatic requestId injection from AsyncLocalStorage
+- **AsyncLocalStorage Integration**: Request context management for async operations
+- **System Code Constants**: Standardized system codes (SUCCESS, BAD_REQUEST, UNAUTHORIZED, etc.)
+- **Error Message Mapping**: Consistent error messages through ERROR_MESSAGE constants
+- **Timestamp Constants**: Centralized timestamp format for consistency
+- **Response Interceptor**: Enhanced with system codes and context-based logging
+- **Request ID Middleware**: Updated to use AsyncLocalStorage for context propagation
+- **User Module**: Basic structure created with GET /users/online endpoint using AsyncLocalStorage
+- **Error Handling**: Comprehensive error transformation with system codes
 - **Documentation**: Comprehensive Memory Bank updates across all files
-- **Code Organization**: Improved maintainability with common utilities
+- **Code Organization**: Improved maintainability with unified logging and context management
 - **Project Structure**: Complete file tree with all implemented features

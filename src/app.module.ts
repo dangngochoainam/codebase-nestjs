@@ -15,9 +15,18 @@ import {
 import { MiddlewareModule } from './common/middleware/middleware.module';
 import { EnvModule } from './config/env.module';
 import { DatabaseModule } from './database/database.module';
+import { UserModule } from './modules/user/user.module';
+import { AlsModule } from './common/middleware/async-local-storage';
 
 @Module({
-    imports: [EnvModule, LoggerModule, DatabaseModule, MiddlewareModule],
+    imports: [
+        EnvModule,
+        LoggerModule,
+        DatabaseModule,
+        AlsModule,
+        MiddlewareModule,
+        UserModule,
+    ],
     providers: [{ provide: APP_INTERCEPTOR, useClass: ResponseInterceptor }],
 })
 export class AppModule implements NestModule {
