@@ -30,7 +30,7 @@ export class EnvironmentConfig {
     @IsNumber()
     @Min(1000)
     @Max(65535)
-    @Transform(({ value }) => parseInt(value, 10))
+    @Transform(({ value }) => parseInt(value as string, 10))
     PORT: number;
 
     @Expose()
@@ -69,38 +69,21 @@ export class EnvironmentConfig {
 
     @Expose()
     @IsBoolean()
-    @Transform(stringToBoolean)
+    @Transform(({ key, obj }) => stringToBoolean(obj[key]))
     @IsOptional()
-    ENABLE_MANUAL_LOGS?: boolean = true;
+    LOG_TO_FILE?: boolean = false;
 
     @Expose()
     @IsBoolean()
-    @Transform(stringToBoolean)
-    @IsOptional()
-    ENABLE_AUTOMATIC_LOGS?: boolean = true;
-
-    @Expose()
-    @IsBoolean()
-    @Transform(stringToBoolean)
-    @IsOptional()
-    LOG_TO_FILE?: boolean = true;
-
-    @Expose()
-    @IsBoolean()
-    @Transform(stringToBoolean)
+    @Transform(({ key, obj }) => stringToBoolean(obj[key]))
     @IsOptional()
     LOG_TO_DATABASE?: boolean = false;
 
     @Expose()
     @IsBoolean()
-    @Transform(stringToBoolean)
+    @Transform(({ key, obj }) => stringToBoolean(obj[key]))
     @IsOptional()
     MASK_SENSITIVE_DATA?: boolean = true;
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    LOG_DATABASE_COLLECTION?: string = 'application_logs';
 
     // CORS Configuration
     @Expose()

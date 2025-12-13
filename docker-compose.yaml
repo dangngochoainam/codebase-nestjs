@@ -1,0 +1,32 @@
+services:
+    codebase-nestjs:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        ports:
+            - '3003:3000'
+        networks:
+            - docker_stack
+        environment:
+            SERVICE_NAME: codebase
+            NODE_ENV: production
+            PORT: 3000
+            API_PREFIX: api
+            APP_NAME: codebase-nestjs
+
+            CORS_ORIGINS: '*'
+
+            DATABASE_URL: mongodb://root:Abc12345@docker-mongo-1:27017/
+            DATABASE_NAME: codebase-nestjs
+
+            JWT_SECRET: your-super-secret-jwt-key-here
+            JWT_EXPIRES_IN: 1d
+
+            LOG_LEVEL: info
+            LOG_TO_FILE: false
+            LOG_TO_DATABASE: false
+            MASK_SENSITIVE_DATA: false
+
+networks:
+    docker_stack:
+        external: true

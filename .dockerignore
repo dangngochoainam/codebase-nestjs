@@ -1,0 +1,17 @@
+.git
+.gitignore
+Dockerfile
+*.md
+*.log
+tmp/
+vendor/
+.vscode/
+node_modules
+memory-bank/
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+tests
+coverage
